@@ -11,16 +11,16 @@
 
 ## ✨ Core Features
 
-- 🚫 **Zero Ads, Zero Algorithms**
+-  **Zero Ads, Zero Algorithms**
   No feed recommendations, no ads. Just your local videos.
 
-- 🎨 **Minimalist Interaction**
+-  **Minimalist Interaction**
   Swipe up/down or left/right to switch screens instantly.
 
-- 🕒 **Resume Playback**
+-  **Resume Playback**
   Automatically remembers your progress for a seamless resume.
 
-- ⚡ **Smart Decoding**
+-  **Smart Decoding**
   Supports hardware decoding with automatic software fallback for unsupported formats. No black screens.
 
 ## 📦 Download & Install
