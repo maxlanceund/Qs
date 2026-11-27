@@ -17,20 +17,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 强制重建合法gradle wrapper 8.7，兜底修复jar缺失
       - name: Prepare valid Gradle wrapper
         run: |
           mkdir -p gradle/wrapper
-          # 写入properties，锁定8.7
-          cat > gradle/wrapper/gradle-wrapper.properties <<PROP
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
-networkTimeout=10000
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-PROP
-          # 下载官方原版wrapper jar
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "networkTimeout=10000" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
           wget -q -O gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
       
