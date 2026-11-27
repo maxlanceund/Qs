@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
-                    val adapter = VideoAdapter(this, videos, historyStore) { showCustomMenu() }
+                    val adapter = VideoAdapter(this, videos, historyStore)
                     viewPager.adapter = adapter
                     adapter.setCurrent(0)
                 }
@@ -105,19 +105,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 【UI 优化】自定义高级黑底抽屉菜单
-    private fun showCustomMenu() {
-        dialog.setContentView(view)
-        
-        dialog.window?.let { window ->
-            window.setGravity(Gravity.BOTTOM)
-            window.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
-            // 底部滑入动画
-            window.setWindowAnimations(android.R.style.Animation_Dialog) 
-            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            val params = window.attributes
-            params.dimAmount = 0.6f // 背景变暗程度
-            window.attributes = params
-        }
 
             toggleOrientation()
             dialog.dismiss()
