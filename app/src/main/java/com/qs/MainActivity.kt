@@ -106,8 +106,6 @@ class MainActivity : AppCompatActivity() {
 
     // 【UI 优化】自定义高级黑底抽屉菜单
     private fun showCustomMenu() {
-        val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar)
-        val view = layoutInflater.inflate(R.layout.dialog_menu, null)
         dialog.setContentView(view)
         
         dialog.window?.let { window ->
@@ -121,18 +119,14 @@ class MainActivity : AppCompatActivity() {
             window.attributes = params
         }
 
-        view.findViewById<View>(R.id.btn_toggle).setOnClickListener {
             toggleOrientation()
             dialog.dismiss()
         }
-        view.findViewById<View>(R.id.btn_folder).setOnClickListener {
             pickFolder.launch(null)
             dialog.dismiss()
         }
-        view.findViewById<View>(R.id.btn_cancel).setOnClickListener {
             dialog.dismiss()
         }
-        dialog.show()
     }
 
     private fun toggleOrientation() {
