@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
-                    val adapter = VideoAdapter(this, videos, historyStore) {} {}
+                    val adapter = VideoAdapter(this, videos, historyStore, {})
                     viewPager.adapter = adapter
                     adapter.setCurrent(0)
                 }
