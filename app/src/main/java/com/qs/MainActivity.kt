@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
         dialog.show()
+*/
     }
 
     private fun toggleOrientation() {
