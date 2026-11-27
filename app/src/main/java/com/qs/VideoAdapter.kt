@@ -9,6 +9,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -19,7 +20,6 @@ class VideoAdapter(
     private val onLongPress: () -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VH>() {
 
-    // 【核心重构】全场只有一个播放器！不再创建池子！
     private var sharedPlayer: ExoPlayer? = null
     private var currentPos = 0
 
@@ -33,10 +33,18 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        // 绑定的时候只挂载界面，不操作播放器
-        holder.playerView.player = sharedPlayer
-        holder.playerView.setKeepContentOnPlayerReset(true)
-        holder.playerView.setShutterBackgroundColor(android.graphics.Color.DKGRAY)
+        // 只有当前显示的位置才挂载播放器，其他Item不绑定player，避免多Surface冲突
+        if (position == currentPos) {
+            if (holder.playerView.player !== sharedPlayer) {
+                holder.playerView.player = sharedPlayer
+            }
+        } else {
+            if (holder.playerView.player != null) {
+                holder.playerView.player = null
+            }
+        }
+
+        holder.playerView.setShutterBackgroundColor(android.graphics.Color.Black)
 
         holder.itemView.setOnClickListener {
             sharedPlayer?.let { p ->
@@ -52,35 +60,42 @@ class VideoAdapter(
 
     override fun onViewRecycled(holder: VH) {
         super.onViewRecycled(holder)
-        // 不要清空 player，保留残影，防止黑屏！
+        // 回收Item，强制解绑播放器，杜绝一个ExoPlayer绑定多个PlayerView（修复黑屏根源）
+        holder.playerView.player = null
     }
 
     override fun getItemCount() = videos.size
 
-    // 当页面切换时，由 MainActivity 触发
     fun setCurrent(position: Int) {
         if (position == currentPos && sharedPlayer != null) return
+        val oldPos = currentPos
         currentPos = position
 
-        // 初始化唯一的播放器
         if (sharedPlayer == null) {
             val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
-            sharedPlayer = ExoPlayer.Builder(context, renderersFactory).build()
-            sharedPlayer?.repeatMode = Player.REPEAT_MODE_ONE
+            sharedPlayer = ExoPlayer.Builder(context, renderersFactory)
+                .build()
+                .apply {
+                    repeatMode = Player.REPEAT_MODE_ONE
+                    // 让解码器输出画面配合视图缩放，缓解高于屏幕分辨率视频卡顿
+                    videoScalingMode = ExoPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT
+                }
         }
 
-        val uri = videos[position]
-        // 保存上一个视频的进度
+        val uri = videos[oldPos]
         historyStore.savePosition(uri.toString(), sharedPlayer?.currentPosition ?: 0L)
 
-        // 换台！
+        val newUri = videos[position]
         sharedPlayer?.let { player ->
-            player.setMediaItem(MediaItem.fromUri(uri))
-            val saved = historyStore.getPosition(uri.toString())
+            player.setMediaItem(MediaItem.fromUri(newUri))
+            val saved = historyStore.getPosition(newUri.toString())
             if (saved > 0) player.seekTo(saved)
             player.prepare()
             player.play()
         }
+        // 通知RecyclerView刷新新旧两个位置，完成播放器挂载切换
+        notifyItemChanged(oldPos)
+        notifyItemChanged(position)
     }
 
     fun saveCurrentPosition() {
