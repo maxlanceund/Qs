@@ -1,6 +1,6 @@
 package com.qs
 import android.graphics.Color
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.media3.ui.PlayerView
 
 import android.content.Context
 import android.net.Uri
