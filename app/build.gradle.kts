@@ -31,7 +31,8 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.exoplayer2:exoplayer:2.19.1")
+    implementation("com.google.android.exoplayer2:exoplayer-core:2.19.1")
+    implementation("com.google.android.exoplayer2:exoplayer-ui:2.19.1")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
