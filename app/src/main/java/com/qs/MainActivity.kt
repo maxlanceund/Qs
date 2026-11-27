@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
-                    val adapter = VideoAdapter(this, videos, historyStore)
+                    val adapter = VideoAdapter(this, videos, historyStore) {}
                     viewPager.adapter = adapter
                     adapter.setCurrent(0)
                 }
@@ -104,47 +104,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 【UI 优化】自定义高级黑底抽屉菜单
-
-            toggleOrientation()
-            dialog.dismiss()
-        }
-            pickFolder.launch(null)
-            dialog.dismiss()
-        }
-            dialog.dismiss()
-        }
-    }
-
-    private fun toggleOrientation() {
-        if (viewPager.orientation == ViewPager2.ORIENTATION_VERTICAL) {
-            viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-            Toast.makeText(this, "左右滑动", Toast.LENGTH_SHORT).show()
-        } else {
-            viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
-            Toast.makeText(this, "上下滑动", Toast.LENGTH_SHORT).show()
-        }
-        (viewPager.adapter as? VideoAdapter)?.setCurrent(viewPager.currentItem)
-    }
-
-    private fun collectVideos(dir: DocumentFile, out: MutableList<Uri>) {
-        val exts = listOf(".mp4", ".webm", ".mkv", ".mov", ".m4v")
-        for (f in dir.listFiles()) {
-            if (f.isDirectory) collectVideos(f, out)
-            else if (f.isFile && exts.any { f.name?.lowercase()?.endsWith(it) == true }) {
-                val fileName = f.name ?: ""
-                if (!fileName.startsWith(".") && f.length() > 1024) out.add(f.uri)
-            }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        (viewPager.adapter as? VideoAdapter)?.saveCurrentPosition()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        (viewPager.adapter as? VideoAdapter)?.releaseAll()
-    }
-}
