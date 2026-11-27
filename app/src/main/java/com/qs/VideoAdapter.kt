@@ -44,7 +44,7 @@ class VideoAdapter(
             }
         }
 
-        holder.playerView.setShutterBackgroundColor(android.graphics.Color.Black)
+        holder.playerView.setShutterBackgroundColor(android.graphics.Color.Color.BLACK)
 
         holder.itemView.setOnClickListener {
             sharedPlayer?.let { p ->
@@ -78,7 +78,7 @@ class VideoAdapter(
                 .apply {
                     repeatMode = Player.REPEAT_MODE_ONE
                     // 让解码器输出画面配合视图缩放，缓解高于屏幕分辨率视频卡顿
-                    videoScalingMode = ExoPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT
+                    videoScalingMode = ExoPlayer.PlayerView.VIDEO_SCALING_MODE_SCALE_TO_FIT
                 }
         }
 
@@ -109,3 +109,5 @@ class VideoAdapter(
         sharedPlayer = null
     }
 }
+import android.graphics.Color
+import com.google.android.exoplayer2.ui.PlayerView
