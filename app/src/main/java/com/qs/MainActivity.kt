@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
 class MainActivity : AppCompatActivity() {
 
     private var viewPager: ViewPager2? = null
-    private lateinit var emptyView: TextView
+    private lateinit var emptyView: View
     private lateinit var pickBtn: Button
     private var historyStore: HistoryStore? = null
 
@@ -50,10 +50,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 【关键】先加载布局，DecorView 才会创建！
         setContentView(R.layout.activity_main)
 
-        // 布局加载完之后，再做全屏沉浸式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let {
@@ -104,6 +102,12 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun setEmptyText(text: String) {
+        // 在emptyView这个Layout里面查找TextView来设置文字，兼容emptyView是LinearLayout的情况
+        val textTv = emptyView.findViewById<TextView?>(R.id.empty_text)
+        textTv?.text = text
+    }
+
     private fun loadVideos(treeUri: Uri) {
         Executors.newSingleThreadExecutor().execute {
             val videos = mutableListOf<Uri>()
@@ -117,14 +121,14 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 if (readError != null) {
-                    emptyView.text = "读取目录出错: $readError"
+                    setEmptyText("读取目录出错: $readError")
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
                     viewPager?.visibility = View.GONE
                     return@runOnUiThread
                 }
                 if (videos.isEmpty()) {
-                    emptyView.text = "文件夹里没有视频\n点击按钮重新选择"
+                    setEmptyText("文件夹里没有视频\n点击按钮重新选择")
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
                     viewPager?.visibility = View.GONE
