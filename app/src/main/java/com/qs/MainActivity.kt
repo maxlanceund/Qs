@@ -21,7 +21,8 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewPager: ViewPager2
+    // 改成可空，不再lateinit，解决销毁时未初始化崩溃
+    private var viewPager: ViewPager2? = null
     private lateinit var emptyView: TextView
     private lateinit var pickBtn: Button
     private var historyStore: HistoryStore? = null
@@ -77,12 +78,12 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "历史记录模块不可用: ${e.message}", Toast.LENGTH_SHORT).show()
         }
 
-        viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
-        viewPager.offscreenPageLimit = 1
+        viewPager?.orientation = ViewPager2.ORIENTATION_VERTICAL
+        viewPager?.offscreenPageLimit = 1
 
         pickBtn.visibility = View.VISIBLE
         emptyView.visibility = View.VISIBLE
-        viewPager.visibility = View.GONE
+        viewPager?.visibility = View.GONE
         pickBtn.setOnClickListener { pickFolder.launch(null) }
 
         val savedUri = prefs.getString("folder", null)
@@ -94,9 +95,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                (viewPager.adapter as? VideoAdapter)?.setCurrent(position)
+                (viewPager?.adapter as? VideoAdapter)?.setCurrent(position)
             }
         })
     }
@@ -117,20 +118,20 @@ class MainActivity : AppCompatActivity() {
                     emptyView.text = "读取目录出错: $readError"
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
-                    viewPager.visibility = View.GONE
+                    viewPager?.visibility = View.GONE
                     return@runOnUiThread
                 }
                 if (videos.isEmpty()) {
                     emptyView.text = "文件夹里没有视频\n点击按钮重新选择"
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
-                    viewPager.visibility = View.GONE
+                    viewPager?.visibility = View.GONE
                 } else {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
-                    viewPager.visibility = View.VISIBLE
+                    viewPager?.visibility = View.VISIBLE
                     val adapter = VideoAdapter(this, videos, historyStore) { showCustomMenu() }
-                    viewPager.adapter = adapter
+                    viewPager?.adapter = adapter
                     adapter.setCurrent(0)
                 }
             }
@@ -169,14 +170,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleOrientation() {
-        if (viewPager.orientation == ViewPager2.ORIENTATION_VERTICAL) {
-            viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-            Toast.makeText(this, "左右滑动", Toast.LENGTH_SHORT).show()
-        } else {
-            viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
-            Toast.makeText(this, "上下滑动", Toast.LENGTH_SHORT).show()
+        viewPager?.let { vp ->
+            if (vp.orientation == ViewPager2.ORIENTATION_VERTICAL) {
+                vp.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+                Toast.makeText(this, "左右滑动", Toast.LENGTH_SHORT).show()
+            } else {
+                vp.orientation = ViewPager2.ORIENTATION_VERTICAL
+                Toast.makeText(this, "上下滑动", Toast.LENGTH_SHORT).show()
+            }
+            (vp.adapter as? VideoAdapter)?.setCurrent(vp.currentItem)
         }
-        (viewPager.adapter as? VideoAdapter)?.setCurrent(viewPager.currentItem)
     }
 
     private fun collectVideos(dir: DocumentFile, out: MutableList<Uri>) {
@@ -193,11 +196,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        (viewPager.adapter as? VideoAdapter)?.saveCurrentPosition()
+        (viewPager?.adapter as? VideoAdapter)?.saveCurrentPosition()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        (viewPager.adapter as? VideoAdapter)?.releaseAll()
+        // 先判空！viewPager有可能是null，不再直接访问lateinit变量
+        (viewPager?.adapter as? VideoAdapter)?.releaseAll()
     }
 }
