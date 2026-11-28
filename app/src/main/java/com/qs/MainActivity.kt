@@ -11,7 +11,6 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -102,12 +101,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun setEmptyText(text: String) {
-        // 在emptyView这个Layout里面查找TextView来设置文字，兼容emptyView是LinearLayout的情况
-        val textTv = emptyView.findViewById<TextView?>(R.id.empty_text)
-        textTv?.text = text
-    }
-
     private fun loadVideos(treeUri: Uri) {
         Executors.newSingleThreadExecutor().execute {
             val videos = mutableListOf<Uri>()
@@ -121,14 +114,13 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 if (readError != null) {
-                    setEmptyText("读取目录出错: $readError")
+                    Toast.makeText(this@MainActivity, "读取目录出错: $readError", Toast.LENGTH_LONG).show()
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
                     viewPager?.visibility = View.GONE
                     return@runOnUiThread
                 }
                 if (videos.isEmpty()) {
-                    setEmptyText("文件夹里没有视频\n点击按钮重新选择")
                     emptyView.visibility = View.VISIBLE
                     pickBtn.visibility = View.VISIBLE
                     viewPager?.visibility = View.GONE
@@ -136,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
                     viewPager?.visibility = View.VISIBLE
-                    val adapter = VideoAdapter(this, videos, historyStore) { showCustomMenu() }
+                    val adapter = VideoAdapter(this@MainActivity, videos, historyStore) { showCustomMenu() }
                     viewPager?.adapter = adapter
                     adapter.setCurrent(0)
                 }
