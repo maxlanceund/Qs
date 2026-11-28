@@ -21,7 +21,6 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
-    // 改成可空，不再lateinit，解决销毁时未初始化崩溃
     private var viewPager: ViewPager2? = null
     private lateinit var emptyView: TextView
     private lateinit var pickBtn: Button
@@ -51,6 +50,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // 【关键】先加载布局，DecorView 才会创建！
+        setContentView(R.layout.activity_main)
+
+        // 布局加载完之后，再做全屏沉浸式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let {
@@ -67,7 +70,6 @@ class MainActivity : AppCompatActivity() {
                     or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         }
 
-        setContentView(R.layout.activity_main)
         viewPager = findViewById(R.id.viewPager)
         emptyView = findViewById(R.id.emptyView)
         pickBtn = findViewById(R.id.pickBtn)
@@ -201,7 +203,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 先判空！viewPager有可能是null，不再直接访问lateinit变量
         (viewPager?.adapter as? VideoAdapter)?.releaseAll()
     }
 }
