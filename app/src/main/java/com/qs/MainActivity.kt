@@ -81,6 +81,31 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    }
+
+
+    private fun collectVideos(dir: DocumentFile, out: MutableList<Uri>) {
+        val exts = listOf(".mp4", ".webm", ".mkv", ".mov", ".m4v")
+        for (f in dir.listFiles()) {
+            if (f.isDirectory) collectVideos(f, out)
+            else if (f.isFile && exts.any { f.name?.lowercase()?.endsWith(it) == true }) {
+                val fileName = f.name ?: ""
+                if (!fileName.startsWith(".") && f.length() > 1024) out.add(f.uri)
+            }
+        }
+    }
+
+    private fun toggleOrientation() {
+        if (viewPager.orientation == ViewPager2.ORIENTATION_VERTICAL) {
+            viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+            Toast.makeText(this, "左右滑动", Toast.LENGTH_SHORT).show()
+        } else {
+            viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+            Toast.makeText(this, "上下滑动", Toast.LENGTH_SHORT).show()
+        }
+        (viewPager.adapter as? VideoAdapter)?.setCurrent(viewPager.currentItem)
+    }
+
     private fun loadVideos(treeUri: Uri) {
         Executors.newSingleThreadExecutor().execute {
             val root = DocumentFile.fromTreeUri(this, treeUri)
@@ -103,4 +128,3 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
