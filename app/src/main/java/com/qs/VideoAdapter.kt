@@ -5,27 +5,48 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.graphics.Color
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 
 class VideoAdapter(
     private val context: Context,
     private val videos: List<Uri>,
-    private val historyStore: HistoryStore,
+    private val historyStore: HistoryStore?,
+    private val sharedPlayer: ExoPlayer?,
     private val onLongPress: () -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VH>() {
 
-    private var sharedPlayer: ExoPlayer? = null
     private var currentPos = 0
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val playerView: PlayerView = view.findViewById(R.id.playerView)
+        val playerView: PlayerView = view.findViewById(androidx.media3.ui.R.id.player_view)
+        var boundUri: Uri? = null
+
+        fun bind(uri: Uri, pos: Int) {
+            boundUri = uri
+            historyStore?.saveHistory(uri.toString())
+
+            if (pos == currentPos) {
+                sharedPlayer?.setMediaItem(MediaItem.fromUri(uri))
+                sharedPlayer?.prepare()
+                sharedPlayer?.playWhenReady = true
+                playerView.player = sharedPlayer
+            } else {
+                if (playerView.player == sharedPlayer) {
+                    playerView.player = null
+                }
+            }
+        }
+
+        fun unbind() {
+            if (playerView.player == sharedPlayer) {
+                playerView.player = null
+            }
+            boundUri = null
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -34,48 +55,20 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val uri = videos[position]
-        holder.itemView.setOnLongClickListener {
-            onLongPress()
-            true
-        }
-        if (position == currentPos) {
-            playAt(holder, uri)
-        } else {
-            holder.playerView.player = null
-        }
+        holder.bind(videos[position], position)
     }
 
-    private fun playAt(holder: VH, uri: Uri) {
-        sharedPlayer?.release()
-        val player = ExoPlayer.Builder(context)
-            .setRenderersFactory(DefaultRenderersFactory(context))
-            .build()
-        player.setMediaItem(MediaItem.fromUri(uri))
-        player.prepare()
-        player.play()
-        holder.playerView.player = player
-        sharedPlayer = player
-    }
-
-    fun setCurrent(pos: Int) {
-        currentPos = pos
-        notifyDataSetChanged()
-    }
-
-    fun saveCurrentPosition() {
-        // 暂时注释：historyStore没有save方法，先跳过历史存储
-        /*
-        sharedPlayer?.let {
-            historyStore.save(videos[currentPos], it.currentPosition)
-        }
-        */
-    }
-
-    fun releaseAll() {
-        sharedPlayer?.release()
-        sharedPlayer = null
+    override fun onViewRecycled(holder: VH) {
+        super.onViewRecycled(holder)
+        holder.unbind()
     }
 
     override fun getItemCount(): Int = videos.size
+
+    fun setCurrent(pos: Int) {
+        val old = currentPos
+        currentPos = pos
+        notifyItemChanged(old)
+        notifyItemChanged(pos)
+    }
 }
