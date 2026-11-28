@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var emptyView: TextView
     private lateinit var pickBtn: Button
     private lateinit var historyStore: HistoryStore
+
     private val prefs by lazy { getSharedPreferences("app", MODE_PRIVATE) }
 
     private val pickFolder = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -37,7 +38,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
         // 【UI 优化】真·全屏沉浸式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity() {
         emptyView = findViewById(R.id.emptyView)
         pickBtn = findViewById(R.id.pickBtn)
         historyStore = HistoryStore(this)
-
         viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
         viewPager.offscreenPageLimit = 1
         pickBtn.setOnClickListener { pickFolder.launch(null) }
@@ -80,9 +79,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
-    }
-
 
     private fun collectVideos(dir: DocumentFile, out: MutableList<Uri>) {
         val exts = listOf(".mp4", ".webm", ".mkv", ".mov", ".m4v")
@@ -108,7 +104,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadVideos(treeUri: Uri) {
         Executors.newSingleThreadExecutor().execute {
-            val root = DocumentFile.fromTreeUri(this, treeUri)
+            val root = DocumentFile.fromTreeUri(this@MainActivity, treeUri)
             val videos = mutableListOf<Uri>()
             if (root != null) collectVideos(root, videos)
             runOnUiThread {
@@ -121,10 +117,11 @@ class MainActivity : AppCompatActivity() {
                     emptyView.visibility = View.GONE
                     pickBtn.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
-                    val adapter = VideoAdapter(this, videos, historyStore, {})
+                    val adapter = VideoAdapter(this@MainActivity, videos, historyStore, {})
                     viewPager.adapter = adapter
                     adapter.setCurrent(0)
                 }
             }
         }
     }
+}
