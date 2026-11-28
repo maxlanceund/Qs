@@ -21,21 +21,19 @@ class VideoAdapter(
     private var currentPos = 0
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        // 改用我们自己布局里面定义的id playerView
         val playerView: PlayerView = view.findViewById(R.id.playerView)
         var boundUri: Uri? = null
 
         fun bind(uri: Uri, pos: Int) {
             boundUri = uri
-            // 暂时注释：HistoryStore不存在saveHistory，先放行编译
-            // historyStore?.saveHistory(uri.toString())
-
             if (pos == currentPos) {
+                // 先绑定player到view，再设置媒体、准备
+                playerView.player = sharedPlayer
                 sharedPlayer?.setMediaItem(MediaItem.fromUri(uri))
                 sharedPlayer?.prepare()
                 sharedPlayer?.playWhenReady = true
-                playerView.player = sharedPlayer
             } else {
+                // 非当前页，解绑
                 if (playerView.player == sharedPlayer) {
                     playerView.player = null
                 }
