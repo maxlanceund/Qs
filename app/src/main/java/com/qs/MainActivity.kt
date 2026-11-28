@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pickBtn: Button
 
     private var sharedPlayer: ExoPlayer? = null
-    private var historyStore: HistoryStore? = null
+    // 直接置空，暂时移除HistoryStore，先跑通基础播放
+    private val historyStore: HistoryStore? = null
 
     private val prefs by lazy { getSharedPreferences("app", MODE_PRIVATE) }
 
@@ -56,12 +57,6 @@ class MainActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
         emptyView = findViewById(R.id.emptyView)
         pickBtn = findViewById(R.id.pickBtn)
-
-        try {
-            historyStore = HistoryStore(this)
-        } catch (e: Exception) {
-            Toast.makeText(this, "历史记录模块加载异常", Toast.LENGTH_SHORT).show()
-        }
 
         sharedPlayer = ExoPlayer.Builder(this).build()
         viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
