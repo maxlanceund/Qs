@@ -34,7 +34,7 @@ class VideoAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val uri = videos[position]
-        holder.playerView.setShutterBackgroundColor(android.graphics.Color.Black)
+        holder.playerView.setShutterBackgroundColor(android.graphics.Color.BLACK)
 
         if (position == currentPos) {
             ensurePlayer()
@@ -77,7 +77,6 @@ class VideoAdapter(
             .build()
             .apply {
                 repeatMode = Player.REPEAT_MODE_ONE
-                videoScalingMode = ExoPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT
             }
     }
 
