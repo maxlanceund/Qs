@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
@@ -22,12 +21,14 @@ class VideoAdapter(
     private var currentPos = 0
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val playerView: PlayerView = view.findViewById(androidx.media3.ui.R.id.player_view)
+        // 改用我们自己布局里面定义的id playerView
+        val playerView: PlayerView = view.findViewById(R.id.playerView)
         var boundUri: Uri? = null
 
         fun bind(uri: Uri, pos: Int) {
             boundUri = uri
-            historyStore?.saveHistory(uri.toString())
+            // 暂时注释：HistoryStore不存在saveHistory，先放行编译
+            // historyStore?.saveHistory(uri.toString())
 
             if (pos == currentPos) {
                 sharedPlayer?.setMediaItem(MediaItem.fromUri(uri))
