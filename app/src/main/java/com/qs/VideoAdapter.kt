@@ -64,9 +64,12 @@ class VideoAdapter(
     }
 
     fun saveCurrentPosition() {
+        // 暂时注释：historyStore没有save方法，先跳过历史存储
+        /*
         sharedPlayer?.let {
             historyStore.save(videos[currentPos], it.currentPosition)
         }
+        */
     }
 
     fun releaseAll() {
